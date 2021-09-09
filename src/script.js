@@ -1,16 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-//Event listner mousemove
-// const cursor = {
-//   x: "",
-//   y: "",
-// };
-
-// window.addEventListener("mousemove", (event) => {
-//   cursor.x = event.clientX / sizes.width - 0.5;
-//   cursor.y = -(event.clientY / sizes.height - 0.5);
-// });
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -23,29 +13,26 @@ const scene = new THREE.Scene();
  */
 
 const groupe = new THREE.Group();
-
-// groupe.position.y = -1;
-// groupe.position.z = -2;
 groupe.scale.set(1, 0.5, 0.5);
 
 scene.add(groupe);
 
 const cube1 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1, 4, 4, 4),
-  new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+  new THREE.MeshBasicMaterial({ color: 0xff54a3, wireframe: true })
 );
 groupe.add(cube1);
 
 const cube2 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1, 2, 2, 5),
-  new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
+  new THREE.MeshBasicMaterial({ color: 0x00ff33, wireframe: true })
 );
 cube2.position.x = 2;
 groupe.add(cube2);
 
 const cube3 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1, 4, 2, 5),
-  new THREE.MeshBasicMaterial({ color: 0x0f00f0, wireframe: true })
+  new THREE.MeshBasicMaterial({ color: 0x4315f0, wireframe: true })
 );
 cube3.position.x = -2;
 groupe.add(cube3);
@@ -99,13 +86,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 const clock = new THREE.Clock();
 
 const tick = () => {
-  // groupe.rotation.y += 0.02;
-  // groupe.rotation.x += 0.01;
   cameraControls.update();
   const elapsedTime = clock.getElapsedTime();
-
-  // groupe.position.y = Math.sin(elapsedTime);
-  // groupe.position.x = Math.cos(elapsedTime);
 
   renderer.render(scene, camera);
   window.requestAnimationFrame(tick);
