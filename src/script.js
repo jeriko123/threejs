@@ -47,6 +47,10 @@ const sizes = {
   height: window.innerHeight,
 };
 
+/**
+ * Resize event
+ */
+
 window.addEventListener("resize", (event) => {
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
@@ -57,6 +61,30 @@ window.addEventListener("resize", (event) => {
 
   //Update Render
   renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+/**
+ * Double click event
+ */
+
+window.addEventListener("dblclick", (event) => {
+  const fullScreen =
+    document.fullscreenElement || document.webkitFullscreenElement;
+
+  if (!fullScreen) {
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen();
+    } else if (canvas.webKitRequestFullscreen) {
+      canvas.webKitRequestFullscreen;
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webExitFullscreen) {
+      document.webExitFullscreen();
+    }
+  }
 });
 
 /**
