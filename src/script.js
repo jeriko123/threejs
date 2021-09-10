@@ -2,71 +2,76 @@ import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+/**
+ * Base
+ */
+
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
 
-/**
- * Objects
- */
+// Object
+// const geometry = new THREE.BoxGeometry(1, 1, 1, 6, 6, 6);
 
-const groupe = new THREE.Group();
-groupe.scale.set(1, 0.5, 0.5);
+// const geometry = new THREE.Geometry();
 
-scene.add(groupe);
+// for (let i = 0; i < 200000; i++) {
+//   for (let j = 0; j < 3; j++) {
+//     geometry.vertices.push(
+//       new THREE.Vector3(
+//         (Math.random() - 0.5) * 5,
+//         (Math.random() - 0.5) * 5,
+//         (Math.random() - 0.5) * 5
+//       )
+//     );
+//   }
 
-const cube1 = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1, 4, 4, 4),
-  new THREE.MeshBasicMaterial({ color: 0xff54a3, wireframe: true })
-);
-groupe.add(cube1);
+//   let ver = i * 3;
+//   geometry.faces.push(new THREE.Face3(ver, ver + 1, ver + 2));
+// }
 
-const cube2 = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1, 2, 2, 5),
-  new THREE.MeshBasicMaterial({ color: 0x00ff33, wireframe: true })
-);
-cube2.position.x = 2;
-groupe.add(cube2);
+const geometry = new THREE.BufferGeometry();
 
-const cube3 = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1, 4, 2, 5),
-  new THREE.MeshBasicMaterial({ color: 0x4315f0, wireframe: true })
-);
-cube3.position.x = -2;
-groupe.add(cube3);
-/**Helpers Axes */
-const axes = new THREE.AxesHelper();
-scene.add(axes);
-/**
- * Sizes
- */
+let count = 800;
+let positionsArray = new Float32Array(count * 3 * 3);
+
+positionsArray.forEach((el, id) => {
+  positionsArray[id] = (Math.random() - 0.5) * 10;
+});
+
+const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
+geometry.setAttribute("position", positionsAttribute);
+
+const material = new THREE.MeshBasicMaterial({
+  color: 0xffff00,
+  wireframe: true,
+});
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+// Sizes
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
 
-/**
- * Resize event
- */
-
-window.addEventListener("resize", (event) => {
+window.addEventListener("resize", () => {
+  // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
 
-  //Update Camera
+  // Update camera
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  //Update Render
+  // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-/**
- * Double click event
- */
+// Double click event
 
 window.addEventListener("dblclick", (event) => {
   const fullScreen =
@@ -87,11 +92,14 @@ window.addEventListener("dblclick", (event) => {
   }
 });
 
-/**
- * Camera
- */
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
-camera.position.z = 3;
+// Camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  100
+);
+camera.position.z = 0.5;
 scene.add(camera);
 
 /**
@@ -100,7 +108,6 @@ scene.add(camera);
 
 const cameraControls = new OrbitControls(camera, canvas);
 cameraControls.enableDamping = true;
-cameraControls.autoRotate = true;
 
 /**
  * Renderer
@@ -115,7 +122,6 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   cameraControls.update();
-  const elapsedTime = clock.getElapsedTime();
 
   renderer.render(scene, camera);
   window.requestAnimationFrame(tick);
