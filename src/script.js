@@ -1,10 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
-/**
- * Base
- */
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -12,46 +8,72 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-// Object
-// const geometry = new THREE.BoxGeometry(1, 1, 1, 6, 6, 6);
+// //helpers
+// const helpers = new THREE.AxesHelper();
+// scene.add(helpers);
 
-// const geometry = new THREE.Geometry();
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 
-// for (let i = 0; i < 200000; i++) {
-//   for (let j = 0; j < 3; j++) {
-//     geometry.vertices.push(
-//       new THREE.Vector3(
-//         (Math.random() - 0.5) * 5,
-//         (Math.random() - 0.5) * 5,
-//         (Math.random() - 0.5) * 5
-//       )
-//     );
-//   }
+const directionLight = new THREE.DirectionalLight(0xffffff, 0.5);
+directionLight.position.set(2, 2, -1);
+directionLight.castShadow = true;
+directionLight.shadow.mapSize.width = 1024;
+directionLight.shadow.mapSize.height = 1024;
+scene.add(directionLight);
 
-//   let ver = i * 3;
-//   geometry.faces.push(new THREE.Face3(ver, ver + 1, ver + 2));
-// }
+directionLight.shadow.camera.top = 3;
+directionLight.shadow.camera.bottom = -3;
+directionLight.shadow.camera.right = 3;
+directionLight.shadow.camera.left = -3;
+directionLight.shadow.camera.near = 0;
+directionLight.shadow.camera.far = 6;
 
-const geometry = new THREE.BufferGeometry();
+// const directionalCameraHelper = new THREE.CameraHelper(directionLight.shadow.camera)
+// scene.add(directionalCameraHelper)
 
-let count = 800;
-let positionsArray = new Float32Array(count * 3 * 3);
+const concern = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.2);
+scene.add(concern);
 
-positionsArray.forEach((el, id) => {
-  positionsArray[id] = (Math.random() - 0.5) * 10;
-});
+const pointLight = new THREE.PointLight(0xff9000, 0.7, 6, 1);
+pointLight.position.set(2, 2, 1);
+scene.add(pointLight);
 
-const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3);
-geometry.setAttribute("position", positionsAttribute);
+/**
+ * Objects
+ */
+// Material
+const material = new THREE.MeshStandardMaterial();
+material.roughness = 0.4;
 
-const material = new THREE.MeshBasicMaterial({
-  color: 0xffff00,
-  wireframe: true,
-});
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+// Objects
+const sphere = new THREE.Mesh(
+  new THREE.SphereBufferGeometry(0.5, 32, 32),
+  material
+);
+sphere.position.x = -5.5;
+sphere.position.y = 2;
+sphere.castShadow = true;
 
-// Sizes
+const cube = new THREE.Mesh(
+  new THREE.BoxBufferGeometry(0.75, 0.75, 0.75),
+  material
+);
+cube.castShadow = true;
+cube.receiveShadow = true;
+
+const plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), material);
+plane.rotation.x = -Math.PI * 0.5;
+plane.position.y = -0.65;
+plane.receiveShadow = true;
+scene.add(sphere, cube, plane);
+
+/**
+ * Sizes
+ */
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
@@ -71,43 +93,24 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-// Double click event
-
-window.addEventListener("dblclick", (event) => {
-  const fullScreen =
-    document.fullscreenElement || document.webkitFullscreenElement;
-
-  if (!fullScreen) {
-    if (canvas.requestFullscreen) {
-      canvas.requestFullscreen();
-    } else if (canvas.webKitRequestFullscreen) {
-      canvas.webKitRequestFullscreen;
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webExitFullscreen) {
-      document.webExitFullscreen();
-    }
-  }
-});
-
-// Camera
+/**
+ * Camera
+ */
+// Base camera
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
   100
 );
-camera.position.z = 0.5;
+camera.position.x = 1;
+camera.position.y = 1;
+camera.position.z = 2;
 scene.add(camera);
 
-/**
- * Controls
- */
-
-const cameraControls = new OrbitControls(camera, canvas);
-cameraControls.enableDamping = true;
+// Controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
 /**
  * Renderer
@@ -117,13 +120,32 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+/**
+ * Animate
+ */
 const clock = new THREE.Clock();
 
 const tick = () => {
-  cameraControls.update();
+  const elapsedTime = clock.getElapsedTime();
 
+  // Update objects
+  cube.rotation.y = 0.1 * elapsedTime;
+  cube.rotation.x = 0.15 * elapsedTime;
+
+  sphere.position.x = Math.sin(elapsedTime) * 1.25;
+  sphere.position.z = Math.cos(elapsedTime) * 1.25;
+
+  sphere.position.y = Math.abs(Math.sin(elapsedTime * 3));
+
+  // Update controls
+  controls.update();
+
+  // Render
   renderer.render(scene, camera);
+
+  // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
 
