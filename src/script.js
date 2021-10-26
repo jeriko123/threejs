@@ -8,7 +8,7 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-// //helpers
+//helpers
 // const helpers = new THREE.AxesHelper();
 // scene.add(helpers);
 
@@ -51,7 +51,7 @@ material.roughness = 0.4;
 
 // Objects
 const sphere = new THREE.Mesh(
-  new THREE.SphereBufferGeometry(0.5, 32, 32),
+  new THREE.SphereBufferGeometry(0.4, 32, 32),
   material
 );
 sphere.position.x = -5.5;
@@ -103,14 +103,18 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.x = 1;
-camera.position.y = 1;
-camera.position.z = 2;
+camera.position.x = 1.5;
+camera.position.y = 2.5;
+camera.position.z = -2.5;
 scene.add(camera);
 
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+controls.maxDistance = 6;
+controls.minDistance = 1;
+controls.enablePan = false;
+controls.maxPolarAngle = Math.PI / 2;
 
 /**
  * Renderer
